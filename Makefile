@@ -376,7 +376,7 @@ INCLUDE ?= -I/usr/local/include
 else ifeq ($(YQ2_OSTYPE),Windows)
 INCLUDE ?= -I/usr/include
 else ifeq ($(YQ2_OSTYPE),Darwin)
-INCLUDE ?= -I/usr/local/include -I/opt/homebrew/include
+INCLUDE ?= -I/usr/local/include -I/opt/homebrew/include -I/opt/local/include
 endif
 
 # ----------
@@ -393,7 +393,7 @@ LDFLAGS ?= -L/usr/local/lib
 else ifeq ($(YQ2_OSTYPE),Windows)
 LDFLAGS ?= -L/usr/lib
 else ifeq ($(YQ2_OSTYPE),Darwin)
-LDFLAGS ?= -L/usr/local/lib -L/opt/homebrew/lib
+LDFLAGS ?= -L/usr/local/lib -L/opt/homebrew/lib -L/opt/local/lib
 endif
 
 # Link address sanitizer if requested.
