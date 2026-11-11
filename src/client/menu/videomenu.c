@@ -49,6 +49,7 @@ static cvar_t *gl3_colorlight;
 static cvar_t *gl4_colorlight;
 static cvar_t *gl4_bloom;
 static cvar_t *vk_dynamic;
+static cvar_t *mtl_dynamic;
 
 static menuframework_s s_opengl_menu;
 
@@ -61,15 +62,18 @@ static menuslider_s s_gl1_intensity_slider;
 static menuslider_s s_gl3_intensity_slider;
 static menuslider_s s_gl4_intensity_slider;
 static menuslider_s s_vk_intensity_slider;
+static menuslider_s s_mtl_intensity_slider;
 static menuslider_s s_gl1_overbrightbits_slider;
 static menuslider_s s_gl3_overbrightbits_slider;
 static menuslider_s s_gl4_overbrightbits_slider;
 static menuslider_s s_vk_overbrightbits_slider;
+static menuslider_s s_mtl_overbrightbits_slider;
 static menuslider_s s_gl1_minlight_slider;
 static menulist_s s_gl3_colorlight_list;
 static menulist_s s_gl4_colorlight_list;
 static menulist_s s_gl4_bloom_list;
 static menulist_s s_vk_dynamic_list;
+static menulist_s s_mtl_dynamic_list;
 static menulist_s s_fs_box;
 static menulist_s s_vsync_list;
 static menulist_s s_af_list;
@@ -80,8 +84,8 @@ static menuaction_s s_apply_action;
 
 // --------
 
-// gl1, gl3, gles1, gles3, gl4, vk, soft
-#define MAXRENDERERS 7
+// gl1, gl3, gles1, gles3, gl4, vk, mtl, soft
+#define MAXRENDERERS 8
 
 typedef enum
 {
@@ -90,6 +94,7 @@ typedef enum
 	ref_gl3,	// encompasses gl3 and gles3
 	ref_gl4,
 	ref_vk,
+	ref_mtl,
 	ref_soft
 } renderer_type;
 
@@ -112,6 +117,7 @@ Renderer_FillRenderdef(void)
 		{"[OpenGL ES3]", "gles3"},
 		{"[OpenGL 4.6]", "gl4"},
 		{"[Vulkan    ]", "vk"},
+		{"[Metal     ]", "mtl"},
 		{"[Software  ]", "soft"},
 		{NULL, NULL}
 	};
@@ -272,6 +278,10 @@ CurrentRendererByCvar(void)
 			return rlist[i].type;
 		}
 		++i;
+	}
+	if (Q_stricmp(vid_renderer->string, "mtl") == 0)
+	{
+		return ref_mtl;
 	}
 	return ref_custom;
 }
@@ -728,6 +738,34 @@ VID_MenuInit(void)
 			s_vk_dynamic_list.curvalue = (vk_dynamic->value != 0);
 			break;
 
+		case ref_mtl:
+			s_mtl_intensity_slider.generic.type = MTYPE_SLIDER;
+			s_mtl_intensity_slider.generic.name = "color intensity";
+			s_mtl_intensity_slider.generic.x = 0;
+			s_mtl_intensity_slider.generic.y = (y += 10);
+			s_mtl_intensity_slider.cvar = "mtl_intensity";
+			s_mtl_intensity_slider.minvalue = 1;
+			s_mtl_intensity_slider.maxvalue = 5;
+			s_mtl_intensity_slider.slidestep = 1;
+			s_mtl_intensity_slider.printformat = "%.0f";
+
+			s_mtl_overbrightbits_slider.generic.type = MTYPE_SLIDER;
+			s_mtl_overbrightbits_slider.generic.name = "overbrights";
+			s_mtl_overbrightbits_slider.generic.x = 0;
+			s_mtl_overbrightbits_slider.generic.y = (y += 10);
+			s_mtl_overbrightbits_slider.cvar = "mtl_overbrightbits";
+			s_mtl_overbrightbits_slider.minvalue = 0.1f;
+			s_mtl_overbrightbits_slider.maxvalue = 5.0f;
+
+			mtl_dynamic = Cvar_Get("mtl_dynamic", "1", CVAR_ARCHIVE);
+			s_mtl_dynamic_list.generic.type = MTYPE_SPINCONTROL;
+			s_mtl_dynamic_list.generic.name = "dynamic light";
+			s_mtl_dynamic_list.generic.x = 0;
+			s_mtl_dynamic_list.generic.y = (y += 10);
+			s_mtl_dynamic_list.itemnames = yesno_names;
+			s_mtl_dynamic_list.curvalue = (mtl_dynamic->value != 0);
+			break;
+
 		case ref_gl1:
 			gl3_colorlight = NULL;
 			s_gl1_intensity_slider.generic.type = MTYPE_SLIDER;
@@ -919,6 +957,11 @@ VID_MenuInit(void)
 			Menu_AddItem(&s_opengl_menu, (void *)&s_vk_intensity_slider);
 			Menu_AddItem(&s_opengl_menu, (void *)&s_vk_overbrightbits_slider);
 			Menu_AddItem(&s_opengl_menu, (void *)&s_vk_dynamic_list);
+			break;
+		case ref_mtl:
+			Menu_AddItem(&s_opengl_menu, (void *)&s_mtl_intensity_slider);
+			Menu_AddItem(&s_opengl_menu, (void *)&s_mtl_overbrightbits_slider);
+			Menu_AddItem(&s_opengl_menu, (void *)&s_mtl_dynamic_list);
 			break;
 		case ref_gl1:
 			Menu_AddItem(&s_opengl_menu, (void *)&s_gl1_intensity_slider);
